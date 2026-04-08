@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+    
+    // Disable inspect element shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+            (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EHPSA</title>
+    
+   <script>
+    // Google Sheets API URL - REPLACE WITH YOUR ACTUAL URL
+    const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbyr_zDT0RZZc4Leoqn1m9_C9HK4QK3BfcXPl7xazgVLii7oMFqqnEOqGbDZzJnMj649/exec';
+</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #1a472a, #0e2a1a);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .admin-header h1 span {
+            color: #FFD700;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: #CE1126;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #FFD700;
+            color: #1a472a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .logout-btn:hover, .back-btn:hover {
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 25px 30px;
+            background: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #CE1126;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .filter-bar {
+            background: white;
+            margin: 0 20px 20px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 250px;
+        }
+
+        .table-container {
+            margin: 0 20px 20px;
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .members-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .members-table th {
+            background: #1a472a;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+
+        .members-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .members-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn {
+            background: #FFD700;
+            color: #1a472a;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .delete-btn {
+            background: #CE1126;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #3B7F2F20;
+            color: #3B7F2F;
+        }
+
+        .status-terminated {
+            background: #CE112620;
+            color: #CE1126;
+        }
+
+        .status-transferred {
+            background: #FFD70020;
+            color: #b87c00;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .modal-content h3 {
+            color: #1a472a;
+            margin-bottom: 20px;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            background: #3B7F2F;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .info-banner {
+            background: #FFD70020;
+            border-left: 4px solid #FFD700;
+            padding: 15px;
+            margin: 0 20px 20px;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .members-table th, .members-table td {
+                font-size: 0.7rem;
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                <img src="images/association-logo.png" alt="EHPSA Logo" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <h1>EHPSA <span>Admin Panel</span></h1>
+        </div>
+        <div class="admin-actions">
+            <a href="bio-data.html" class="back-btn">← Back to Database</a>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <div class="info-banner">
+        ℹ️ <strong>Student Bio Data Management</strong> — Here you can view, edit, and manage all student members. 
+        Changes will reflect immediately on the Student Bio Data page.
+    </div>
+
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <div class="stat-number" id="totalMembers">0</div>
+            <div class="stat-label">Total Members</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="activeMembers">0</div>
+            <div class="stat-label">Active Members</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="terminatedMembers">0</div>
+            <div class="stat-label">Terminated</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="transferredMembers">0</div>
+            <div class="stat-label">Transferred</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>Status:</label>
+            <select id="filterStatus">
+                <option value="all">All Members</option>
+                <option value="active">Active</option>
+                <option value="terminated">Terminated</option>
+                <option value="transferred">Transferred</option>
+            </select>
+            <select id="filterMembership">
+                <option value="all">All Types</option>
+                <option value="student">Student</option>
+                <option value="executive">Executive</option>
+                <option value="supporter">Supporter</option>
+            </select>
+            <select id="filterDistrict">
+                <option value="all">All Districts</option>
+                <option value="Goroka">Goroka</option>
+                <option value="Kainantu">Kainantu</option>
+                <option value="Henganofi">Henganofi</option>
+                <option value="Lufa">Lufa</option>
+                <option value="Unggai-Bena">Unggai-Bena</option>
+                <option value="Daulo">Daulo</option>
+                <option value="Okapa">Okapa</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by name or student ID...">
+            <button id="resetFilters" style="background:#CE1126; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Reset</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Student ID</th>
+                    <th>District</th>
+                    <th>Program</th>
+                    <th>Membership</th>
+                    <th>Status</th>
+                    <th>Skills</th>
+                    <th>Career Goal</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="11" class="no-results">Loading members...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Edit Member Information</h3>
+            <form id="editForm">
+                <input type="hidden" id="editMemberId">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>Student ID *</label>
+                    <input type="text" id="editStudentId" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label>District</label>
+                    <select id="editDistrict">
+                        <option value="Goroka">Goroka</option>
+                        <option value="Kainantu">Kainantu</option>
+                        <option value="Henganofi">Henganofi</option>
+                        <option value="Lufa">Lufa</option>
+                        <option value="Unggai-Bena">Unggai-Bena</option>
+                        <option value="Daulo">Daulo</option>
+                        <option value="Okapa">Okapa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Program</label>
+                    <input type="text" id="editProgram">
+                </div>
+                <div class="form-group">
+                    <label>Year of Study</label>
+                    <input type="text" id="editYear">
+                </div>
+                <div class="form-group">
+                    <label>Membership Type</label>
+                    <select id="editMembershipType">
+                        <option value="student">Student Member</option>
+                        <option value="executive">Executive Member</option>
+                        <option value="supporter">Alumni/Supporter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus">
+                        <option value="active">Active</option>
+                        <option value="terminated">Terminated</option>
+                        <option value="transferred">Transferred</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Skills & Talents</label>
+                    <textarea id="editSkills" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Career Goal</label>
+                    <textarea id="editCareerGoal" rows="2"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="save-btn">Save Changes</button>
+                    <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Check admin session
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'admin-login.html';
+        }
+
+        let members = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                active: '<span class="status-badge status-active">✓ Active</span>',
+                terminated: '<span class="status-badge status-terminated">✗ Terminated</span>',
+                transferred: '<span class="status-badge status-transferred">↗ Transferred</span>'
+            };
+            return badges[status] || badges.active;
+        }
+
+        function getMembershipLabel(type) {
+            const labels = {
+                student: 'Student',
+                executive: 'Executive',
+                supporter: 'Supporter'
+            };
+            return labels[type] || type;
+        }
+
+        async function loadMembers() {
+            try {
+                const response = await fetch(`${GOOGLE_SHEETS_API}?action=read`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error loading members:', error);
+                return [];
+            }
+        }
+
+        async function renderStats() {
+            members = await loadMembers();
+            const total = members.length;
+            const active = members.filter(m => (m['Status'] || 'active') === 'active').length;
+            const terminated = members.filter(m => m['Status'] === 'terminated').length;
+            const transferred = members.filter(m => m['Status'] === 'transferred').length;
+            
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('activeMembers').textContent = active;
+            document.getElementById('terminatedMembers').textContent = terminated;
+            document.getElementById('transferredMembers').textContent = transferred;
+            
+            applyFilters();
+        }
+
+        function renderTable(filteredMembers) {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredMembers.length === 0) {
+                tbody.innerHTML = ':<td colspan="11" class="no-results">No members found. Members will appear here after they submit the membership form.  ';
+                return;
+            }
+            
+            tbody.innerHTML = filteredMembers.map(member => `
+                <tr>
+                    <td style="font-size:0.7rem;">${escapeHtml(member['ID'] ? member['ID'].slice(-8) : '—')}</td>
+                    <td><strong>${escapeHtml(member['Full Name'] || '—')}</strong></td>
+                    <td>${escapeHtml(member['Student ID'] || '—')}</td>
+                    <td>${escapeHtml(member['District'] || '—')}</td>
+                    <td>${escapeHtml(member['Program'] || '—')}</td>
+                    <td>${getMembershipLabel(member['Membership Type'])}</td>
+                    <td>${getStatusBadge(member['Status'] || 'active')}</td>
+                    <td style="max-width:150px; white-space:normal;">${escapeHtml((member['Skills'] || '—').substring(0, 60))}</td>
+                    <td style="max-width:150px; white-space:normal;"><em>${escapeHtml((member['Career Goal'] || '—').substring(0, 50))}</em></td>
+                    <td style="font-size:0.7rem;">${member['Timestamp'] ? member['Timestamp'].split('T')[0] : '—'}</td>
+                    <td class="action-buttons">
+                        <button class="edit-btn" onclick="openEditModal('${member['ID']}')">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteMember('${member['ID']}')">🗑️ Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function applyFilters() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const membershipFilter = document.getElementById('filterMembership').value;
+            const districtFilter = document.getElementById('filterDistrict').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = [...members];
+            
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(m => (m['Status'] || 'active') === statusFilter);
+            }
+            if (membershipFilter !== 'all') {
+                filtered = filtered.filter(m => m['Membership Type'] === membershipFilter);
+            }
+            if (districtFilter !== 'all') {
+                filtered = filtered.filter(m => m['District'] === districtFilter);
+            }
+            if (searchTerm) {
+                filtered = filtered.filter(m => 
+                    (m['Full Name'] && m['Full Name'].toLowerCase().includes(searchTerm)) ||
+                    (m['Program'] && m['Program'].toLowerCase().includes(searchTerm)) ||
+                    (m['Student ID'] && m['Student ID'].toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            renderTable(filtered);
+        }
+        
+        function resetFilters() {
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterMembership').value = 'all';
+            document.getElementById('filterDistrict').value = 'all';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+        
+        function openEditModal(memberId) {
+            const member = members.find(m => m['ID'] === memberId);
+            if (!member) return;
+            
+            document.getElementById('editMemberId').value = member['ID'];
+            document.getElementById('editName').value = member['Full Name'] || '';
+            document.getElementById('editStudentId').value = member['Student ID'] || '';
+            document.getElementById('editEmail').value = member['Email'] || '';
+            document.getElementById('editPhone').value = member['Phone'] || '';
+            document.getElementById('editDistrict').value = member['District'] || 'Goroka';
+            document.getElementById('editProgram').value = member['Program'] || '';
+            document.getElementById('editYear').value = member['Year'] || '';
+            document.getElementById('editMembershipType').value = member['Membership Type'] || 'student';
+            document.getElementById('editStatus').value = member['Status'] || 'active';
+            document.getElementById('editSkills').value = member['Skills'] || '';
+            document.getElementById('editCareerGoal').value = member['Career Goal'] || '';
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        async function saveEdit(e) {
+            e.preventDefault();
+            const memberId = document.getElementById('editMemberId').value;
+            
+            const formData = new URLSearchParams();
+            formData.append('action', 'update');
+            formData.append('id', memberId);
+            formData.append('fullname', document.getElementById('editName').value);
+            formData.append('studentId', document.getElementById('editStudentId').value);
+            formData.append('email', document.getElementById('editEmail').value);
+            formData.append('phone', document.getElementById('editPhone').value);
+            formData.append('district', document.getElementById('editDistrict').value);
+            formData.append('program', document.getElementById('editProgram').value);
+            formData.append('year', document.getElementById('editYear').value);
+            formData.append('membershipType', document.getElementById('editMembershipType').value);
+            formData.append('status', document.getElementById('editStatus').value);
+            formData.append('skills', document.getElementById('editSkills').value);
+            formData.append('careerGoal', document.getElementById('editCareerGoal').value);
+            
+            try {
+                const response = await fetch(GOOGLE_SHEETS_API, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    await renderStats();
+                    closeModal();
+                    alert('✅ Member information updated successfully!');
+                } else {
+                    alert('❌ Error updating member. Please try again.');
+                }
+            } catch (error) {
+                console.error('Update error:', error);
+                alert('❌ Connection error. Please try again.');
+            }
+        }
+        
+        async function deleteMember(memberId) {
+            if (confirm('⚠️ Are you sure you want to delete this member? This action cannot be undone.')) {
+                const formData = new URLSearchParams();
+                formData.append('action', 'delete');
+                formData.append('id', memberId);
+                
+                try {
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        await renderStats();
+                        alert('🗑️ Member has been deleted.');
+                    } else {
+                        alert('❌ Error deleting member. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    alert('❌ Connection error. Please try again.');
+                }
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById('filterMembership').addEventListener('change', applyFilters);
+        document.getElementById('filterDistrict').addEventListener('change', applyFilters);
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('resetFilters').addEventListener('click', resetFilters);
+        document.getElementById('editForm').addEventListener('submit', saveEdit);
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'admin-login.html';
+        });
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+        
+        // Initial load
+        renderStats();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            renderStats();
+        }, 10000);
+    </script>
+</body>
+</html>

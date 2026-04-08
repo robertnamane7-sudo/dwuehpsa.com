@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+    
+    // Disable inspect element shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+            (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    });
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - EHPSA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+        }
+
+               /* Top Bar with Provincial Colors */
+        .top-bar {
+            background: linear-gradient(to right, #CE1126, #3B7F2F, #FFD700);
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .flags-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .flag {
+            width: 85px;
+            height: 85px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .flag img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Sliding Theme */
+        .theme-slider {
+            flex: 1;
+            background: transparent;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sliding-text {
+            white-space: nowrap;
+            animation: slideLeft 20s linear infinite;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        /* Sliding Theme */
+        .theme-slider {
+            flex: 1;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .sliding-text {
+            white-space: nowrap;
+            animation: slideLeft 20s linear infinite;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            max-width: 1200px;
+            margin: 0 auto;
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background: linear-gradient(to right, #CE1126, #3B7F2F);
+        }
+        /* Page Header with Diagonal Background Images - ONLY HEADER */
+        .page-header {
+            position: relative;
+            background: linear-gradient(135deg, rgba(26, 71, 42, 0.88), rgba(14, 42, 26, 0.88));
+            color: white;
+            text-align: center;
+            padding: 100px 20px;
+            overflow: hidden;
+            min-height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Diagonal Background Images Container - ONLY WITHIN HEADER */
+        .diagonal-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .diagonal-bg img {
+            position: absolute;
+            object-fit: cover;
+            opacity: 0.4;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Image 1 - Left side (dragged DOWN to show head dress) */
+        .diagonal-bg img:nth-child(1) {
+            top: 60px;
+            left: -80px;
+            width: 320px;
+            height: 400px;
+            transform: rotate(-18deg);
+            opacity: 0.45;
+            object-position: top 15% center;
+        }
+
+        /* Image 2 - Top Right (dragged UP) */
+        .diagonal-bg img:nth-child(2) {
+            top: -30px;
+            right: -70px;
+            width: 280px;
+            height: 280px;
+            transform: rotate(12deg);
+            opacity: 0.4;
+        }
+
+        /* Image 3 - Bottom Right (stays below) */
+        .diagonal-bg img:nth-child(3) {
+            bottom: 20px;
+            right: -60px;
+            width: 260px;
+            height: 260px;
+            transform: rotate(5deg);
+            opacity: 0.35;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.2) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.2);
+            padding: 30px 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            font-style: italic;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.2) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.2);
+            padding: 30px 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            font-style: italic;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #1a472a;
+            border-bottom: 3px solid #FFD700;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        .title-wrapper {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* About Content */
+        .about-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .about-content p {
+            color: #444;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        /* Mission & Vision Grid */
+        .mission-vision {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .mv-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            border-top: 5px solid #FFD700;
+        }
+
+        .mv-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .mv-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .mv-card h3 {
+            color: #1a472a;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .mv-card p {
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* Core Values Grid */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .value-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .value-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .value-card .value-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .value-card h4 {
+            color: #CE1126;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .value-card p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Founders Section */
+        .founders-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+                /* Pioneer Founders Section with Background Image */
+        .pioneer-bg {
+            background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('images/pioneer.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin: 40px 0;
+        }
+        /* Fix for Kada Jackson's profile photo - center face */
+        .founder-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 20%;
+            border: 3px solid #FFD700;
+            margin-bottom: 15px;
+        }
+
+        /* Specific adjustment for Kada's photo */
+        .founder-card:nth-child(3) img {
+            object-position: center 25%;
+        }
+
+
+        .pioneer-bg .title-wrapper,
+        .pioneer-bg .founders-grid {
+            position: relative;
+            z-index: 2;
+        }
+
+        .pioneer-bg .section-title {
+            color: #FFD700;
+            border-bottom-color: #FFD700;
+        }
+
+        .pioneer-bg .founder-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+            transition: transform 0.3s;
+        }
+
+        .pioneer-bg .founder-card:hover {
+            background: white;
+            transform: translateY(-5px);
+        }
+
+        .founders-section h3 {
+            color: #1a472a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .founders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .founder-card {
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+
+        .founder-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .founder-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .founder-card h4 {
+            color: #1a472a;
+            margin-bottom: 5px;
+        }
+
+        .founder-card .role {
+            color: #CE1126;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .founder-card .course {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 40px 20px 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .footer-section a:hover {
+            color: #FFD700;
+        }
+
+        .footer-section .social-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+        }
+                  /* Who We Are Section with Background Image */
+        .who-we-are-bg {
+            background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('images/who.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+
+        .who-we-are-bg .about-content {
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .who-we-are-bg .about-content p {
+            color: #FFD700;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Make the header white */
+        .who-we-are-bg .section-title {
+            color: white;
+            border-bottom-color: #FFD700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sliding-text {
+                font-size: 1rem;
+                animation-duration: 12s;
+            }
+            
+            .flag {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .flags-container {
+                gap: 10px;
+            }
+            
+            nav ul li a {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .page-header {
+                padding: 60px 20px;
+            }
+            
+            .diagonal-bg img {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .about-content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar with Flags -->
+    <div class="top-bar">
+        <div class="flags-container">
+            <div class="flag">
+                <img src="images/dwu.png" alt="DWU Logo">
+            </div>
+            <div class="theme-slider">
+                <div class="sliding-text"> Eastern Pride, Boundless Stride, Motanehe!..</div>
+            </div>
+            <div class="flag">
+                <img src="images/association-logo.png" alt="EHPSA Logo">
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="activities.html">Activities</a></li>
+        <li><a href="membership.html">Membership</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="bio-data.html">Student Bio Data</a></li>
+    </ul>
+</nav>
+    <!-- Page Header with Diagonal Background Images -->
+    <section class="page-header">
+        <div class="diagonal-bg">
+            <img src="images/about.jpg" alt="Cultural Background">
+            <img src="images/sports1.jpg" alt="Sports Background">
+            <img src="images/us.jpg" alt="Community Background">
+        </div>
+        <div class="page-header-content">
+            <h1>About Eastern Highlands Province Student Association</h1>
+            <p><em>Uniting the sons and daughters of the Land of the Rising Sun</em></p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+
+                 <!-- Who We Are -->
+        <div class="who-we-are-bg">
+            <div class="title-wrapper">
+                <h2 class="section-title">Who We Are</h2>
+            </div>
+            <div class="about-content">
+                <p>The Eastern Highlands Province Student Association (EHPSA) is a vibrant and dynamic organization representing students from Eastern Highlands Province studying at Divine Word University (DWU), Madang Campus. Established to foster unity, preserve cultural heritage, and promote academic excellence, EHPSA serves as a home away from home for our members.</p>
+                
+                <p>With a rich history rooted in the traditions of the "Land of the Rising Sun," our association brings together students from all districts — from Goroka to Kainantu, from Henganofi to Lufa, and from Unggai-Bena to Daulo and Okapa. We celebrate the diversity within our province while standing united under one banner.</p>
+                
+                <p>EHPSA is more than just a student association — it is a family. We support each other academically, socially, and spiritually, ensuring that every member feels valued, heard, and empowered to achieve their full potential.</p>
+            </div>
+        </div>
+
+        <!-- Mission & Vision -->
+        <div class="title-wrapper">
+            <h2 class="section-title">Our Mission & Vision</h2>
+        </div>
+        <div class="mission-vision">
+            <div class="mv-card">
+                <div class="icon">🎯</div>
+                <h3>Our Mission</h3>
+                <p>To unite and empower students from Eastern Highlands Province at Divine Word University by fostering cultural pride, academic excellence, social responsibility, and lifelong bonds of friendship.</p>
+            </div>
+            <div class="mv-card">
+                <div class="icon">👁️</div>
+                <h3>Our Vision</h3>
+                <p>To be a beacon of unity and excellence, producing future leaders who proudly represent Eastern Highlands Province with integrity, knowledge, and a spirit of service to their communities and nation.</p>
+            </div>
+        </div>
+
+        <!-- Our Core Values -->
+        <div class="title-wrapper">
+            <h2 class="section-title">Our Core Values</h2>
+        </div>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <h4>Unity</h4>
+                <p>Standing together as one family, transcending district and clan boundaries to support one another.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🎭</div>
+                <h4>Cultural Pride</h4>
+                <p>Preserving and celebrating our rich Eastern Highlands traditions, languages, and heritage.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">📚</div>
+                <h4>Academic Excellence</h4>
+                <p>Striving for the highest standards in education and supporting members in their academic journey.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">❤️</div>
+                <h4>Service</h4>
+                <p>Giving back to our communities through service projects and acts of compassion.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🙏</div>
+                <h4>Integrity</h4>
+                <p>Upholding honesty, transparency, and Christian values in all our endeavors.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🌟</div>
+                <h4>Leadership</h4>
+                <p>Developing future leaders who will make a positive impact in Papua New Guinea.</p>
+            </div>
+        </div>
+
+        <!-- Our History -->
+        <div class="title-wrapper">
+            <h2 class="section-title">Our History</h2>
+        </div>
+        <div class="about-content">
+            <p>The Eastern Highlands Province Student Association was founded by a group of visionary students who recognized the need for a unified body to support students from the province at Divine Word University. What began as small gatherings of Eastern Highlands students has grown into one of the most vibrant and active provincial student associations on campus.</p>
+            
+            <p>We honor and acknowledge the pioneer initiators who laid the foundation of EHPSA — their vision and dedication continue to inspire us today.</p>
+        </div>
+
+               <!-- Pioneer Founders Section with Background -->
+        <div class="pioneer-bg">
+            <div class="title-wrapper">
+                <h2 class="section-title">Our Pioneer Founders</h2>
+            </div>
+            <div class="founders-section" style="background: transparent; box-shadow: none; padding: 0;">
+                <h3>Honoring Those Who Built EHPSA</h3>
+                <div class="founders-grid">
+                    <div class="founder-card">
+                        <img src="images/jayden.jpg" alt="Jayden Heve" onerror="this.src='https://placehold.co/120x120?text=Jayden'">
+                        <h4>Jayden Heve</h4>
+                        <div class="role">Former President</div>
+                        <div class="course">Bachelor in Environmental Health</div>
+                    </div>
+                    <div class="founder-card">
+                        <img src="images/freda.jpg" alt="Freda Siape" onerror="this.src='https://placehold.co/120x120?text=Freda'">
+                        <h4>Fredah Siape</h4>
+                        <div class="role">Former Vice President</div>
+                        <div class="course">Bachelor in Environmental Health</div>
+                    </div>
+                    <div class="founder-card">
+                        <img src="images/kada.jpg" alt="Kada Jackson" onerror="this.src='https://placehold.co/120x120?text=Kada'">
+                        <h4>Kada Jackson</h4>
+                        <div class="role">Co-Founder</div>
+                        <div class="course">Bachelor in Environmental Health</div>
+                    </div>
+                    <div class="founder-card">
+                        <img src="images/graham.jpg" alt="Graham Tokaniso" onerror="this.src='https://placehold.co/120x120?text=Graham'">
+                        <h4>Graham Kuman</h4>
+                        <div class="role">Former Treasurer</div>
+                        <div class="course">Bachelor in Health Management and Systems Development</div>
+                    </div>
+                    <div class="founder-card">
+                        <img src="images/michael.jpg" alt="Michael Aha" onerror="this.src='https://placehold.co/120x120?text=Michael'">
+                        <h4>Michael Aha</h4>
+                        <div class="role">Former Finance Lead</div>
+                        <div class="course">Bachelor IN Mathematics and Computer Science</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Why Join Us -->
+        <div class="title-wrapper">
+            <h2 class="section-title">Why Join EHPSA?</h2>
+        </div>
+        <div class="mission-vision">
+            <div class="mv-card">
+                <div class="icon">🤝</div>
+                <h3>Community & Support</h3>
+                <p>Find your family away from home. Connect with fellow Eastern Highlands students who understand your journey and are ready to support you.</p>
+            </div>
+            <div class="mv-card">
+                <div class="icon">🎓</div>
+                <h3>Academic Resources</h3>
+                <p>Access study groups, tutoring support, and academic guidance from senior students who have walked the path before you.</p>
+            </div>
+            <div class="mv-card">
+                <div class="icon">🎉</div>
+                <h3>Cultural Connection</h3>
+                <p>Stay connected to your roots through cultural events, traditional performances, and celebrations of Eastern Highlands heritage.</p>
+            </div>
+            <div class="mv-card">
+                <div class="icon">🏆</div>
+                <h3>Leadership Opportunities</h3>
+                <p>Develop your leadership skills by taking on roles, organizing events, and contributing to the growth of our association.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>EHPSA</h4>
+                <p>Eastern Highlands Province Student Association<br>Divine Word University, Madang, PNG</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="about.html">About Us</a>
+                <a href="activities.html">Activities</a>
+                <a href="membership.html">Join Us</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <a href="mailto:ehpsa@dwu.ac.pg">📧 ehpsa@dwu.ac.pg</a>
+                <a href="#">📞 +675 123 4567</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <a href="#"><img src="images/facebook-icon.png" alt="Facebook" class="social-icon"> Facebook</a>
+                <a href="#"><img src="images/whatsapp-icon.png" alt="WhatsApp" class="social-icon"> WhatsApp</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Eastern Highlands Province Student Association. All rights reserved.</p>
+            <p>🏔️ Eastern Pride, Boundless Stride, Motanehe 🏔️</p>
+        </div>
+    </footer>
+
+</body>
+</html>

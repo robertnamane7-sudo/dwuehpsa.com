@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+    
+    // Disable inspect element shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+            (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    });
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activities - EHPSA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+        }
+
+        /* Top Bar with Provincial Colors */
+        .top-bar {
+            background: linear-gradient(to right, #CE1126, #3B7F2F, #FFD700);
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .flags-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .flag {
+            width: 85px;
+            height: 85px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .flag img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Sliding Theme */
+        .theme-slider {
+            flex: 1;
+            background: transparent;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sliding-text {
+            white-space: nowrap;
+            animation: slideLeft 20s linear infinite;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            max-width: 1200px;
+            margin: 0 auto;
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background: linear-gradient(to right, #CE1126, #3B7F2F);
+        }
+
+                /* Header with Swapping Images - Brighter Version */
+        .activities-header {
+            position: relative;
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            z-index: 0;
+        }
+
+        .bg-grid .bg-col {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-grid .bg-col img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .bg-grid .bg-col img.active {
+            opacity: 0.65;  /* Brighter than before (was 0.5) */
+        }
+
+        .activities-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55));  /* Lighter overlay */
+            z-index: 1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            padding: 60px 20px;
+        }
+
+        .header-content h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .header-content p {
+            font-size: 1.2rem;
+            font-style: italic;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        }
+        /* Activity Section */
+        .activity-section {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .activity-card {
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 800px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .activity-card h2 {
+            color: #3B7F2F;
+        }
+
+        .gallery {
+            position: relative;
+            max-width: 600px;
+            margin: 10px auto;
+        }
+
+        .gallery img {
+            width: 100%;
+            border-radius: 5px;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .gallery button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10;
+            border-radius: 5px;
+        }
+
+        .gallery button:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .gallery button:first-of-type {
+            left: 0;
+        }
+
+        .gallery button:last-of-type {
+            right: 0;
+        }
+
+        .activity-description {
+            font-style: italic;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 40px 20px 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .footer-section a:hover {
+            color: #FFD700;
+        }
+
+        .footer-section .social-icon-img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sliding-text {
+                font-size: 1rem;
+                animation-duration: 12s;
+            }
+            
+            .flag {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .flags-container {
+                gap: 10px;
+            }
+            
+            nav ul li a {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .header-content h1 {
+                font-size: 2rem;
+            }
+            
+            .gallery button {
+                padding: 5px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar with Flags -->
+    <div class="top-bar">
+        <div class="flags-container">
+            <div class="flag">
+                <img src="images/dwu.png" alt="DWU Logo">
+            </div>
+            <div class="theme-slider">
+                <div class="sliding-text"> Eastern Pride, Boundless Stride, Motanehe!..</div>
+            </div>
+            <div class="flag">
+                <img src="images/association-logo.png" alt="EHPSA Logo">
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="activities.html" class="active">Activities</a></li>
+            <li><a href="membership.html">Membership</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="bio-data.html">Student Bio Data</a></li>
+        </ul>
+    </nav>
+
+    <!-- Header with Swapping Images -->
+    <div class="activities-header">
+        <div class="bg-grid" id="bgGrid">
+            <div class="bg-col">
+                <img src="images/cultural1.jpg" alt="Cultural" class="active">
+                <img src="images/career1.jpg" alt="Career">
+                <img src="images/sports1.jpg" alt="Sports">
+                <img src="images/community1.jpg" alt="Community">
+                <img src="images/bilum1.jpg" alt="Bilum">
+                <img src="images/fundraising1.jpg" alt="Fundraising">
+            </div>
+            <div class="bg-col">
+                <img src="images/cultural2.jpg" alt="Cultural">
+                <img src="images/career2.jpg" alt="Career">
+                <img src="images/sports2.jpg" alt="Sports">
+                <img src="images/community2.jpg" alt="Community">
+                <img src="images/bilum2.jpg" alt="Bilum">
+                <img src="images/fundraising2.jpg" alt="Fundraising">
+            </div>
+            <div class="bg-col">
+                <img src="images/cultural3.jpg" alt="Cultural">
+                <img src="images/career3.jpg" alt="Career">
+                <img src="images/sports3.jpg" alt="Sports">
+                <img src="images/community3.jpg" alt="Community">
+                <img src="images/bilum3.jpg" alt="Bilum">
+                <img src="images/fundraising3.jpg" alt="Fundraising">
+            </div>
+        </div>
+        <div class="header-content">
+            <h1>Our Activities</h1>
+            <p><em>Celebrating culture, education, sports, service, unity, and fundraising</em></p>
+        </div>
+    </div>
+
+    <!-- Activity Cards -->
+    <div class="activity-section">
+
+        <!-- Cultural Performances -->
+        <div class="activity-card">
+            <h2>Cultural Performances</h2>
+            <p>We proudly showcase traditional dances and cultural heritage during school shows and university events.</p>
+            <div class="gallery">
+                <img id="cultural-img" src="images/cultural1.jpg" alt="Cultural Dance">
+                <button onclick="prevImage('cultural')">&#10094;</button>
+                <button onclick="nextImage('cultural')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Our dances symbolize unity and pride in Eastern Highlands traditions.</em></p>
+        </div>
+
+        <!-- Career Expo -->
+        <div class="activity-card">
+            <h2>Career Expo</h2>
+            <p>Our members participate in career expos, promoting Divine Word University across high schools in PNG.</p>
+            <div class="gallery">
+                <img id="career-img" src="images/career1.jpg" alt="Career Expo">
+                <button onclick="prevImage('career')">&#10094;</button>
+                <button onclick="nextImage('career')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Inspiring future leaders through education and awareness.</em></p>
+        </div>
+
+        <!-- Sports - East Nokondis -->
+        <div class="activity-card">
+            <h2>Sports - East Nokondis</h2>
+            <p>EHPSA supports the East Nokondis rugby league team, fostering teamwork and athletic excellence.</p>
+            <div class="gallery">
+                <img id="sports-img" src="images/sports1.jpg" alt="East Nokondis Rugby Team">
+                <button onclick="prevImage('sports')">&#10094;</button>
+                <button onclick="nextImage('sports')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Strength, unity, and determination on the field.</em></p>
+        </div>
+
+        <!-- Community Service -->
+        <div class="activity-card">
+            <h2>Community Service</h2>
+            <p>We engage in projects such as campus clean-ups and hospital visits to Modilon Hospital, showing our commitment to giving back.</p>
+            <div class="gallery">
+                <img id="community-img" src="images/community1.jpg" alt="Community Service">
+                <button onclick="prevImage('community')">&#10094;</button>
+                <button onclick="nextImage('community')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Serving with compassion and responsibility for our community.</em></p>
+        </div>
+
+        <!-- Bilum Exchange -->
+        <div class="activity-card">
+            <h2>Bilum Exchange</h2>
+            <p>We host events where we invite other provincial student associations, exchange bilums, share stories, and build networks.</p>
+            <div class="gallery">
+                <img id="bilum-img" src="images/bilum1.jpg" alt="Bilum Exchange">
+                <button onclick="prevImage('bilum')">&#10094;</button>
+                <button onclick="nextImage('bilum')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Strengthening bonds through cultural exchange and friendship.</em></p>
+        </div>
+
+        <!-- Fundraising -->
+        <div class="activity-card">
+            <h2>Fundraising</h2>
+            <p>We organize fundraising events to support our members, sponsor community projects, and assist students in need.</p>
+            <div class="gallery">
+                <img id="fundraising-img" src="images/fundraising1.jpg" alt="Fundraising Event">
+                <button onclick="prevImage('fundraising')">&#10094;</button>
+                <button onclick="nextImage('fundraising')">&#10095;</button>
+            </div>
+            <p class="activity-description"><em>Together we raise, together we grow — supporting our community.</em></p>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>EHPSA</h4>
+                <p>Eastern Highlands Province Student Association<br>Divine Word University, Madang, PNG</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="about.html">About Us</a>
+                <a href="activities.html">Activities</a>
+                <a href="membership.html">Join Us</a>
+                <a href="bio-data.html">Student Bio Data</a>
+                <a href="admin-login.html">🔐 Admin</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <a href="mailto:ehpsa@dwu.ac.pg">📧 ehpsa@dwu.ac.pg</a>
+                <a href="#">📞 +675 123 4567</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <a href="#"><img src="images/facebook-icon.png" alt="Facebook" class="social-icon-img"> Facebook</a>
+                <a href="#"><img src="images/whatsapp-icon.png" alt="WhatsApp" class="social-icon-img"> WhatsApp</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Eastern Highlands Province Student Association. All rights reserved.</p>
+            <p>🏔️ Eastern Pride, Boundless Stride, Motanehe 🏔️</p>
+        </div>
+    </footer>
+
+    <script>
+        // Image sets for each activity
+        const galleries = {
+            cultural: ["images/cultural1.jpg", "images/cultural2.jpg", "images/cultural3.jpg"],
+            career: ["images/career1.jpg", "images/career2.jpg", "images/career3.jpg"],
+            sports: ["images/sports1.jpg", "images/sports2.jpg", "images/sports3.jpg"],
+            community: ["images/community1.jpg", "images/community2.jpg", "images/community3.jpg"],
+            bilum: ["images/bilum1.jpg", "images/bilum2.jpg", "images/bilum3.jpg"],
+            fundraising: ["images/fundraising1.jpg", "images/fundraising2.jpg", "images/fundraising3.jpg"]
+        };
+
+        let indices = { 
+            cultural: 0, 
+            career: 0, 
+            sports: 0, 
+            community: 0, 
+            bilum: 0,
+            fundraising: 0 
+        };
+        
+        // Store intervals for each gallery
+        let intervals = {};
+
+        function showImage(activity) {
+            const img = document.getElementById(activity + "-img");
+            if (img && galleries[activity] && galleries[activity][indices[activity]]) {
+                img.src = galleries[activity][indices[activity]];
+            }
+        }
+
+        function prevImage(activity) {
+            // Reset auto-shuffle timer when user manually clicks
+            resetAutoShuffle(activity);
+            indices[activity] = (indices[activity] - 1 + galleries[activity].length) % galleries[activity].length;
+            showImage(activity);
+        }
+
+        function nextImage(activity) {
+            // Reset auto-shuffle timer when user manually clicks
+            resetAutoShuffle(activity);
+            indices[activity] = (indices[activity] + 1) % galleries[activity].length;
+            showImage(activity);
+        }
+        
+        function startAutoShuffle(activity) {
+            // Clear existing interval if any
+            if (intervals[activity]) {
+                clearInterval(intervals[activity]);
+            }
+            // Start new interval (every 4 seconds)
+            intervals[activity] = setInterval(() => {
+                indices[activity] = (indices[activity] + 1) % galleries[activity].length;
+                showImage(activity);
+            }, 4000);
+        }
+        
+        function resetAutoShuffle(activity) {
+            // Restart the interval to give user control temporarily
+            startAutoShuffle(activity);
+        }
+
+        // Start auto-shuffle for all activities
+        for (let activity in galleries) {
+            startAutoShuffle(activity);
+        }
+
+        // Background Image Swapping (3 columns, changing every 3 seconds)
+        const bgCols = document.querySelectorAll('.bg-col');
+        const colImages = [];
+        bgCols.forEach(col => {
+            colImages.push(Array.from(col.querySelectorAll('img')));
+        });
+
+        function setupColumnRotation(imagesArray) {
+            let currentIndex = 0;
+            imagesArray.forEach((img, idx) => {
+                img.classList.toggle('active', idx === 0);
+            });
+            
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % imagesArray.length;
+                imagesArray.forEach((img, idx) => {
+                    img.classList.toggle('active', idx === currentIndex);
+                });
+            }, 3000);
+        }
+
+        colImages.forEach(images => {
+            if (images.length > 0) {
+                setupColumnRotation(images);
+            }
+        });
+    </script>
+
+</body>
+</html>

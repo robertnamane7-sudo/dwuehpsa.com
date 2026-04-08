@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+    
+    // Disable inspect element shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+            (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+        }
+    });
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Bio Data - EHPSA</title>
+    <script>
+    // Google Sheets API URL - REPLACE WITH YOUR ACTUAL URL
+    const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbyr_zDT0RZZc4Leoqn1m9_C9HK4QK3BfcXPl7xazgVLii7oMFqqnEOqGbDZzJnMj649/exec';
+</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+        }
+
+        .top-bar {
+            background: linear-gradient(to right, #CE1126, #3B7F2F, #FFD700);
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .flags-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .flag {
+            width: 85px;
+            height: 85px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .flag img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .theme-slider {
+            flex: 1;
+            background: transparent;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sliding-text {
+            white-space: nowrap;
+            animation: slideLeft 20s linear infinite;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        nav {
+            background-color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            max-width: 1200px;
+            margin: 0 auto;
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background: linear-gradient(to right, #CE1126, #3B7F2F);
+        }
+        /* Page Header with Background Image */
+        .page-header {
+            position: relative;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('images/bio.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+                .page-header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            font-style: italic;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .admin-link-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-link-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-login-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .admin-login-link:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-2px);
+            border-color: #FFD700;
+        }
+
+        .admin-text {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .admin-badge {
+            background: #CE1126;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 30px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #1a472a;
+            border-bottom: 3px solid #FFD700;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        .title-wrapper {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #FFD700;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #CE1126;
+        }
+
+        .stat-label {
+            color: #1a472a;
+            margin-top: 10px;
+        }
+
+        .filter-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 250px;
+        }
+
+        .reset-btn {
+            background: #CE1126;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        .members-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .members-table th {
+            background: linear-gradient(135deg, #1a472a, #0e2a1a);
+            color: white;
+            padding: 14px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        .members-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            color: #444;
+            vertical-align: top;
+        }
+
+        .members-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .skills-text {
+            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 40px 20px 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .footer-section a:hover {
+            color: #FFD700;
+        }
+
+        .footer-section .social-icon-img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .sliding-text {
+                font-size: 1rem;
+                animation-duration: 12s;
+            }
+            .flag {
+                width: 60px;
+                height: 60px;
+            }
+            .flags-container {
+                gap: 10px;
+            }
+            nav ul li a {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-input {
+                width: 100%;
+            }
+            .members-table th,
+            .members-table td {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+        }
+            /* Download Button */
+        .download-pdf-btn {
+            background: linear-gradient(135deg, #CE1126, #3B7F2F);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-pdf-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }</style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="flags-container">
+            <div class="flag">
+                <img src="images/dwu.png" alt="DWU Logo">
+            </div>
+            <div class="theme-slider">
+                <div class="sliding-text"> Eastern Pride, Boundless Stride, Motanehe!.. </div>
+            </div>
+            <div class="flag">
+                <img src="images/association-logo.png" alt="EHPSA Logo">
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="activities.html">Activities</a></li>
+            <li><a href="membership.html">Membership</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="bio-data.html" class="active">Student Bio Data</a></li>
+        </ul>
+    </nav>
+
+    <section class="page-header">
+        
+        <p><em>Meet the members of the Eastern Highlands Province Student Association</em></p>
+        <div class="admin-link-container">
+            <a href="admin-login.html" class="admin-login-link">
+                <span class="admin-text">🔐 Admin Access</span>
+                <span class="admin-badge">Restricted</span>
+            </a>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="title-wrapper">
+            <h2 class="section-title">Our Members Directory</h2>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalMembers">0</div>
+                <div class="stat-label">Total Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="studentMembers">0</div>
+                <div class="stat-label">Student Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="executiveMembers">0</div>
+                <div class="stat-label">Executive Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="alumniSupporters">0</div>
+                <div class="stat-label">Alumni & Supporters</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Filter by:</label>
+                <select id="filterMembership">
+                    <option value="all">All Members</option>
+                    <option value="student">Student Members</option>
+                    <option value="executive">Executive Members</option>
+                    <option value="supporter">Alumni & Supporters</option>
+                </select>
+                <select id="filterDistrict">
+                    <option value="all">All Districts</option>
+                    <option value="Goroka">Goroka</option>
+                    <option value="Kainantu">Kainantu</option>
+                    <option value="Henganofi">Henganofi</option>
+                    <option value="Lufa">Lufa</option>
+                    <option value="Unggai-Bena">Unggai-Bena</option>
+                    <option value="Daulo">Daulo</option>
+                    <option value="Okapa">Okapa</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, program, or skills...">
+                <button id="resetFilters" class="reset-btn">Reset</button>
+            </div>
+        </div>
+                <div class="btn-container">
+            <button id="downloadPdfBtn" class="download-pdf-btn">
+                📄 Download Filtered List (PDF)
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="members-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>District</th>
+                        <th>Program</th>
+                        <th>Year</th>
+                        <th>Membership</th>
+                        <th>Skills</th>
+                        <th>Career Goal</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="9" class="no-results">Loading member data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>EHPSA</h4>
+                <p>Eastern Highlands Province Student Association<br>Divine Word University, Madang, PNG</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="about.html">About Us</a>
+                <a href="activities.html">Activities</a>
+                <a href="membership.html">Join Us</a>
+                <a href="bio-data.html">Student Bio Data</a>
+                <a href="admin-login.html">🔐 Admin</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <a href="mailto:ehpsa@dwu.ac.pg">📧 ehpsa@dwu.ac.pg</a>
+                <a href="#">📞 +675 123 4567</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <a href="#"><img src="images/facebook-icon.png" alt="Facebook" class="social-icon-img"> Facebook</a>
+                <a href="#"><img src="images/whatsapp-icon.png" alt="WhatsApp" class="social-icon-img"> WhatsApp</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Eastern Highlands Province Student Association. All rights reserved.</p>
+            <p>🏔️ Eastern Pride, Boundless Stride, Motanehe 🏔️</p>
+        </div>
+    </footer>
+    <script>
+        // Load members from Google Sheets
+        async function loadMembers() {
+            try {
+                const response = await fetch(`${GOOGLE_SHEETS_API}?action=read`);
+                const members = await response.json();
+                return members;
+            } catch (error) {
+                console.error('Error loading members:', error);
+                return [];
+            }
+        }
+
+        let allMembers = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        async function renderStats() {
+            allMembers = await loadMembers();
+            const total = allMembers.length;
+            const student = allMembers.filter(m => m['Membership Type'] === 'student').length;
+            const executive = allMembers.filter(m => m['Membership Type'] === 'executive').length;
+            const supporter = allMembers.filter(m => m['Membership Type'] === 'supporter').length;
+            
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('studentMembers').textContent = student;
+            document.getElementById('executiveMembers').textContent = executive;
+            document.getElementById('alumniSupporters').textContent = supporter;
+            
+            return allMembers;
+        }
+
+        function renderTable(filteredMembers) {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredMembers.length === 0) {
+                tbody.innerHTML = ':<td colspan="9" class="no-results">No members found. Be the first to join!  ';
+                return;
+            }
+            
+            tbody.innerHTML = filteredMembers.map(member => `
+                <tr>
+                    <td><strong>${escapeHtml(member['Full Name'] || '—')}</strong></td>
+                    <td>${escapeHtml(member['Student ID'] || '—')}</td>
+                    <td>${escapeHtml(member['District'] || '—')}</td>
+                    <td>${escapeHtml(member['Program'] || '—')}</td>
+                    <td>${escapeHtml(member['Year'] || '—')}</td>
+                    <td>
+                        <span style="background: ${member['Membership Type'] === 'student' ? '#3B7F2F20' : member['Membership Type'] === 'executive' ? '#CE112620' : '#FFD70020'}; 
+                                     color: ${member['Membership Type'] === 'student' ? '#3B7F2F' : member['Membership Type'] === 'executive' ? '#CE1126' : '#b87c00'}; 
+                                     padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
+                            ${member['Membership Type'] === 'student' ? 'Student' : member['Membership Type'] === 'executive' ? 'Executive' : 'Supporter'}
+                        </span>
+                    </td>
+                    <td class="skills-text">${escapeHtml(member['Skills'] || '—')}</td>
+                    <td class="skills-text"><em>${escapeHtml(member['Career Goal'] || '—')}</em></td>
+                    <td style="font-size: 0.75rem;">${member['Timestamp'] ? member['Timestamp'].split('T')[0] : '—'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function applyFilters() {
+            const members = allMembers.length ? allMembers : await loadMembers();
+            const membershipFilter = document.getElementById('filterMembership').value;
+            const districtFilter = document.getElementById('filterDistrict').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = [...members];
+            
+            if (membershipFilter !== 'all') {
+                filtered = filtered.filter(m => m['Membership Type'] === membershipFilter);
+            }
+            if (districtFilter !== 'all') {
+                filtered = filtered.filter(m => m['District'] === districtFilter);
+            }
+            if (searchTerm) {
+                filtered = filtered.filter(m => 
+                    (m['Full Name'] && m['Full Name'].toLowerCase().includes(searchTerm)) ||
+                    (m['Program'] && m['Program'].toLowerCase().includes(searchTerm)) ||
+                    (m['Skills'] && m['Skills'].toLowerCase().includes(searchTerm)) ||
+                    (m['Career Goal'] && m['Career Goal'].toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            renderTable(filtered);
+        }
+        
+        function resetFilters() {
+            document.getElementById('filterMembership').value = 'all';
+            document.getElementById('filterDistrict').value = 'all';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+        
+        // Event listeners
+        document.getElementById('filterMembership').addEventListener('change', applyFilters);
+        document.getElementById('filterDistrict').addEventListener('change', applyFilters);
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('resetFilters').addEventListener('click', resetFilters);
+        
+        // Initial load
+        renderStats();
+        applyFilters();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            renderStats();
+            applyFilters();
+        }, 10000);
+            // Download Filtered List as PDF
+        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+            // Get current filtered members
+            const membershipFilter = document.getElementById('filterMembership').value;
+            const districtFilter = document.getElementById('filterDistrict').value;
+            const searchTerm = document.getElementById('searchInput').value;
+            
+            // Get filtered members
+            let filtered = [...allMembers];
+            
+            if (membershipFilter !== 'all') {
+                filtered = filtered.filter(m => m['Membership Type'] === membershipFilter);
+            }
+            if (districtFilter !== 'all') {
+                filtered = filtered.filter(m => m['District'] === districtFilter);
+            }
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(m => 
+                    (m['Full Name'] && m['Full Name'].toLowerCase().includes(term)) ||
+                    (m['Program'] && m['Program'].toLowerCase().includes(term)) ||
+                    (m['Skills'] && m['Skills'].toLowerCase().includes(term))
+                );
+            }
+            
+            // Generate filter description
+            let filterDescription = 'All Members';
+            if (membershipFilter !== 'all') {
+                filterDescription = membershipFilter === 'student' ? 'Student Members' : 
+                                   membershipFilter === 'executive' ? 'Executive Members' : 'Alumni & Supporters';
+            }
+            if (districtFilter !== 'all') {
+                filterDescription += ` from ${districtFilter}`;
+            }
+            if (searchTerm) {
+                filterDescription += ` matching "${searchTerm}"`;
+            }
+            
+            // Generate HTML for PDF
+            const pdfContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EHPSA Student Bio Data Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background: #f0f0f0;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            overflow: hidden; 
+        }
+        .header-banner { 
+            background: linear-gradient(135deg, #CE1126, #3B7F2F, #FFD700); 
+            padding: 25px 30px; 
+            text-align: center; 
+        }
+        .logo-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .logo { 
+            width: 70px; 
+            height: 70px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .logo svg { 
+            width: 100%; 
+            height: 100%; 
+        }
+        .title-area { 
+            text-align: center; 
+            margin: 0 15px; 
+        }
+        .title-area h1 { 
+            color: #FFD700; 
+            font-size: 1.2rem; 
+            margin-bottom: 5px; 
+        }
+        .title-area p { 
+            color: white; 
+            font-style: italic; 
+            font-size: 0.8rem; 
+        }
+        .badge { 
+            background: rgba(255,255,255,0.2); 
+            display: inline-block; 
+            padding: 5px 15px; 
+            border-radius: 30px; 
+            margin-top: 10px; 
+            font-size: 0.75rem; 
+            color: white; 
+        }
+        .content { 
+            padding: 30px; 
+        }
+        .report-info {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #FFD700;
+        }
+        .report-info p {
+            color: #333;
+            margin: 5px 0;
+        }
+        .report-info .filter-badge {
+            background: #1a472a;
+            color: #FFD700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        .members-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        .members-table th { 
+            background: linear-gradient(135deg, #1a472a, #0e2a1a); 
+            color: white; 
+            padding: 12px 10px; 
+            text-align: left; 
+            font-size: 0.85rem;
+        }
+        .members-table td { 
+            padding: 10px; 
+            border-bottom: 1px solid #eee; 
+            color: #444; 
+            font-size: 0.8rem;
+        }
+        .members-table tr:hover { 
+            background: #f5f5f5; 
+        }
+        .footer { 
+            margin-top: 25px; 
+            text-align: center; 
+            font-size: 10px; 
+            color: #888; 
+            border-top: 1px solid #eee; 
+            padding-top: 20px; 
+        }
+        .count-info {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #1a472a;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .header-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-banner">
+        <div class="logo-container">
+            <div class="logo">
+                <svg width="70" height="70" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#1a472a" stroke="#FFD700" stroke-width="2"/>
+                    <text x="50" y="65" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold">DWU</text>
+                </svg>
+            </div>
+            <div class="title-area">
+                <h1>🏔️ EASTERN HIGHLANDS PROVINCE STUDENT ASSOCIATION</h1>
+                <p>Eastern Pride, Boundless Stride, Motanehe</p>
+                <div class="badge">Student Bio Data Report</div>
+            </div>
+            <div class="logo">
+                <svg width="70" height="70" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#CE1126" stroke="#FFD700" stroke-width="2"/>
+                    <text x="50" y="65" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold">EHPSA</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="report-info">
+            <p><strong>Report Generated:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Filter Applied:</strong> <span class="filter-badge">${escapeHtml(filterDescription)}</span></p>
+        </div>
+        
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Student ID</th>
+                    <th>District</th>
+                    <th>Program</th>
+                    <th>Year</th>
+                    <th>Membership</th>
+                    <th>Skills</th>
+                    <th>Career Goal</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filtered.map(member => `
+                <tr>
+                    <td><strong>${escapeHtml(member['Full Name'] || '—')}</strong></td>
+                    <td>${escapeHtml(member['Student ID'] || '—')}</td>
+                    <td>${escapeHtml(member['District'] || '—')}</td>
+                    <td>${escapeHtml(member['Program'] || '—')}</td>
+                    <td>${escapeHtml(member['Year'] || '—')}</td>
+                    <td>${member['Membership Type'] === 'student' ? 'Student' : member['Membership Type'] === 'executive' ? 'Executive' : 'Supporter'}</td>
+                    <td>${escapeHtml((member['Skills'] || '—').substring(0, 100))}</td>
+                    <td><em>${escapeHtml((member['Career Goal'] || '—').substring(0, 80))}</em></td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+        <div class="count-info">
+            Total Members: ${filtered.length}
+        </div>
+        <div class="footer">
+            <p>This is an official report from the Eastern Highlands Province Student Association.</p>
+            <p>For inquiries, please contact the EHPSA executive team.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>`;
+            
+            // Create blob and download
+            const blob = new Blob([pdfContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `EHPSA_Members_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });</script>
+</body>
+</html>
